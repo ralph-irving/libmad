@@ -1,2 +1,2 @@
-version=2
-ftp://ftp.mars.org/mpeg/libmad-(.*)\.tar\.gz debian uupdate
+version=3
+opts=pgpsigurlmangle==s/$/.sign/ ftp://ftp.mars.org/mpeg/ libmad-(.*)\.tar\.gz

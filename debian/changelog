@@ -1,4 +1,13 @@
-libmad (0.15.1b-8+deb9u1) stretch-security; urgency=high
+libmad (0.15.1b-10) unstable; urgency=medium
+
+  * Remove old alioth list as maintainer (Closes: #899582)
+  * Remove Sam Clegg from uploaders
+  * Add upstream signing key
+  * Update watch file to find the signature file
+
+ -- Kurt Roeckx <kurt@roeckx.be>  Sun, 10 Mar 2019 16:42:14 +0100
+
+libmad (0.15.1b-9) unstable; urgency=high
 
   * Properly check the size of the main data. The previous patch
     only checked that it could fit in the buffer, but didn't ensure there
@@ -10,7 +19,17 @@ libmad (0.15.1b-8+deb9u1) stretch-security; urgency=high
     covers parsing the frame and layer3, not just layer 1 and 2. This was
     original reported in #508133. CVE-2017-8374 mentions a case in layer 3.
 
- -- Kurt Roeckx <kurt@roeckx.be>  Tue, 01 May 2018 13:20:28 +0200
+ -- Kurt Roeckx <kurt@roeckx.be>  Sun, 28 Jan 2018 16:28:46 +0100
+
+libmad (0.15.1b-8.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Remove Clément Stenac from Uploaders (Closes: #868708)
+
+  [ Helmut Grohne ]
+  * Move mad.pc to a multiarch location. (Closes: #850461)
+
+ -- Manuel A. Fernandez Montecelo <mafm@debian.org>  Tue, 31 Oct 2017 22:16:36 +0100
 
 libmad (0.15.1b-8) unstable; urgency=low
 

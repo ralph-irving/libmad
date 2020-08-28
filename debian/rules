@@ -6,6 +6,7 @@
 
 DEB_DH_MAKESHLIBS_ARGS_libmad0 = -V 'libmad0 (>= 0.15.1b-3)'
 
+include /usr/share/dpkg/architecture.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
 include /usr/share/cdbs/1/rules/patchsys-quilt.mk
@@ -23,3 +24,6 @@ endif
 clean::
 	# annoying lintian errors
 	rm -f config.cache libz/config.log libz/config.status
+
+install/libmad0-dev::
+	install -m644 -D debian/mad.pc debian/libmad0-dev/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/mad.pc
