@@ -33,7 +33,7 @@ extern "C" {
 # define SIZEOF_LONG_LONG 8
 
 
-/* Id: version.h,v 1.24 2003/05/27 22:40:37 rob Exp */
+/* Id: version.h,v 1.26 2004/01/23 09:41:33 rob Exp */
 
 # ifndef LIBMAD_VERSION_H
 # define LIBMAD_VERSION_H
@@ -41,7 +41,7 @@ extern "C" {
 # define MAD_VERSION_MAJOR	0
 # define MAD_VERSION_MINOR	15
 # define MAD_VERSION_PATCH	1
-# define MAD_VERSION_EXTRA	" (beta)"
+# define MAD_VERSION_EXTRA	"-11"
 
 # define MAD_VERSION_STRINGIZE(str)	#str
 # define MAD_VERSION_STRING(num)	MAD_VERSION_STRINGIZE(num)
@@ -51,7 +51,7 @@ extern "C" {
 				MAD_VERSION_STRING(MAD_VERSION_PATCH)  \
 				MAD_VERSION_EXTRA
 
-# define MAD_PUBLISHYEAR	"2000-2003"
+# define MAD_PUBLISHYEAR	"2000-2004"
 # define MAD_AUTHOR		"Underbit Technologies, Inc."
 # define MAD_EMAIL		"info@underbit.com"
 
@@ -62,7 +62,7 @@ extern char const mad_build[];
 
 # endif
 
-/* Id: fixed.h,v 1.36 2003/05/28 04:36:00 rob Exp */
+/* Id: fixed.h,v 1.38 2004/02/17 02:02:03 rob Exp */
 
 # ifndef LIBMAD_FIXED_H
 # define LIBMAD_FIXED_H
@@ -253,7 +253,22 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 	    : "cc");  \
        __result;  \
     })
-#    else
+#   elif defined(OPT_INTEL)
+/*
+ * Alternate Intel scaling that may or may not perform better.
+ */
+#    define mad_f_scale64(hi, lo)  \
+    ({ mad_fixed_t __result;  \
+       asm ("shrl %3,%1\n\t"  \
+	    "shll %4,%2\n\t"  \
+	    "orl %2,%1"  \
+	    : "=rm" (__result)  \
+	    : "0" (lo), "r" (hi),  \
+	      "I" (MAD_F_SCALEBITS), "I" (32 - MAD_F_SCALEBITS)  \
+	    : "cc");  \
+       __result;  \
+    })
+#   else
 #    define mad_f_scale64(hi, lo)  \
     ({ mad_fixed_t __result;  \
        asm ("shrdl %3,%2,%1"  \
@@ -305,12 +320,25 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 	 : "+r" (lo), "+r" (hi)  \
 	 : "%r" (x), "r" (y))
 
+#ifdef __thumb__
+/* In Thumb-2, the RSB-immediate instruction is only allowed with a zero
+	operand.  If needed this code can also support Thumb-1 
+	(simply append "s" to the end of the second two instructions). */
+#  define MAD_F_MLN(hi, lo)  \
+    asm ("rsbs        %0, %0, #0\n\t"  \
+	 "sbc   %1, %1, %1\n\t"  \
+	 "sub   %1, %1, %2"  \
+	 : "+&r" (lo), "=&r" (hi)  \
+	 : "r" (hi)  \
+	 : "cc")
+#else /* ! __thumb__ */
 #  define MAD_F_MLN(hi, lo)  \
     asm ("rsbs	%0, %2, #0\n\t"  \
 	 "rsc	%1, %3, #0"  \
-	 : "=r" (lo), "=r" (hi)  \
+	 : "=&r" (lo), "=r" (hi)  \
 	 : "0" (lo), "1" (hi)  \
 	 : "cc")
+#endif /* __thumb__ */
 
 #  define mad_f_scale64(hi, lo)  \
     ({ mad_fixed_t __result;  \
@@ -327,6 +355,14 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 
 /* --- MIPS ---------------------------------------------------------------- */
 
+# elif defined(FPM_MIPS) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
+   typedef unsigned int u64_di_t __attribute__ ((mode (DI))); 
+#  define MAD_F_MLX(hi, lo, x, y) \
+   do { \
+      u64_di_t __ll = (u64_di_t) (x) * (y); \
+      hi = __ll >> 32; \
+      lo = __ll; \
+   } while (0)
 # elif defined(FPM_MIPS)
 
 /*
@@ -528,7 +564,7 @@ mad_fixed_t mad_f_div(mad_fixed_t, mad_fixed_t);
 
 # endif
 
-/* Id: bit.h,v 1.11 2003/05/27 22:40:36 rob Exp */
+/* Id: bit.h,v 1.12 2004/01/23 09:41:32 rob Exp */
 
 # ifndef LIBMAD_BIT_H
 # define LIBMAD_BIT_H
@@ -557,7 +593,7 @@ unsigned short mad_bit_crc(struct mad_bitptr, unsigned int, unsigned short);
 
 # endif
 
-/* Id: timer.h,v 1.15 2003/05/27 22:40:37 rob Exp */
+/* Id: timer.h,v 1.16 2004/01/23 09:41:33 rob Exp */
 
 # ifndef LIBMAD_TIMER_H
 # define LIBMAD_TIMER_H
@@ -639,7 +675,7 @@ void mad_timer_string(mad_timer_t, char *, char const *,
 
 # endif
 
-/* Id: stream.h,v 1.18 2003/05/27 22:40:37 rob Exp */
+/* Id: stream.h,v 1.20 2004/02/05 09:02:39 rob Exp */
 
 # ifndef LIBMAD_STREAM_H
 # define LIBMAD_STREAM_H
@@ -665,6 +701,7 @@ enum mad_error {
   MAD_ERROR_BADCRC	   = 0x0201,	/* CRC check failed */
   MAD_ERROR_BADBITALLOC	   = 0x0211,	/* forbidden bit allocation value */
   MAD_ERROR_BADSCALEFACTOR = 0x0221,	/* bad scalefactor index */
+  MAD_ERROR_BADMODE        = 0x0222,	/* bad bitrate/mode combination */
   MAD_ERROR_BADFRAMELEN	   = 0x0231,	/* bad frame length */
   MAD_ERROR_BADBIGVALUES   = 0x0232,	/* bad big_values count */
   MAD_ERROR_BADBLOCKTYPE   = 0x0233,	/* reserved block_type */
@@ -727,7 +764,7 @@ char const *mad_stream_errorstr(struct mad_stream const *);
 
 # endif
 
-/* Id: frame.h,v 1.19 2003/05/27 22:40:36 rob Exp */
+/* Id: frame.h,v 1.20 2004/01/23 09:41:32 rob Exp */
 
 # ifndef LIBMAD_FRAME_H
 # define LIBMAD_FRAME_H
@@ -824,7 +861,7 @@ void mad_frame_mute(struct mad_frame *);
 
 # endif
 
-/* Id: synth.h,v 1.14 2003/05/27 22:40:37 rob Exp */
+/* Id: synth.h,v 1.15 2004/01/23 09:41:33 rob Exp */
 
 # ifndef LIBMAD_SYNTH_H
 # define LIBMAD_SYNTH_H
@@ -873,7 +910,7 @@ void mad_synth_frame(struct mad_synth *, struct mad_frame const *);
 
 # endif
 
-/* Id: decoder.h,v 1.16 2003/05/27 22:40:36 rob Exp */
+/* Id: decoder.h,v 1.17 2004/01/23 09:41:32 rob Exp */
 
 # ifndef LIBMAD_DECODER_H
 # define LIBMAD_DECODER_H
