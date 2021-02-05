@@ -12730,7 +12730,7 @@ test -n "$optimize" && CFLAGS="$CFLAGS $optimize"
 test -n "$profile"  && CFLAGS="$CFLAGS $profile" LDFLAGS="$LDFLAGS $profile"
 
 
-ac_config_files="$ac_config_files Makefile msvc++/Makefile libmad.list"
+ac_config_files="$ac_config_files Makefile msvc++/Makefile libmad.list mad.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13737,6 +13737,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "msvc++/Makefile") CONFIG_FILES="$CONFIG_FILES msvc++/Makefile" ;;
     "libmad.list") CONFIG_FILES="$CONFIG_FILES libmad.list" ;;
+    "mad.pc") CONFIG_FILES="$CONFIG_FILES mad.pc" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
