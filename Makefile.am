@@ -24,6 +24,9 @@
 SUBDIRS =		
 DIST_SUBDIRS =		msvc++
 
+pkgconfigdir =		$(libdir)/pkgconfig
+pkgconfig_DATA =	mad.pc
+
 lib_LTLIBRARIES =	libmad.la
 include_HEADERS =	mad.h
 
@@ -34,7 +37,8 @@ minimad_INCLUDES =
 minimad_LDADD =		libmad.la
 
 EXTRA_DIST =		mad.h.sed  \
-			CHANGES COPYRIGHT CREDITS README TODO VERSION
+			CHANGES COPYRIGHT CREDITS README TODO VERSION \
+			mad.pc.in
 
 exported_headers =	version.h fixed.h bit.h timer.h stream.h frame.h  \
 			synth.h decoder.h

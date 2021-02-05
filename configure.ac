@@ -366,5 +366,5 @@ dnl LTLIBOBJS=`echo "$LIBOBJS" | sed -e 's/\.o/.lo/g'`
 dnl AC_SUBST(LTLIBOBJS)
 
 AC_CONFIG_FILES([Makefile msvc++/Makefile  \
-	libmad.list])
+	libmad.list mad.pc])
 AC_OUTPUT
